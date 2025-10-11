@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Naskh_Arabic } from "next/font/google";
 import { LanguageProvider } from "@/components/language-provider";
+import { AuthProvider } from "@/components/auth-provider";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -38,7 +40,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${notoNaskhArabic.variable} antialiased font-sans`}
       >
         <LanguageProvider>
-          {children}
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

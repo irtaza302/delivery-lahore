@@ -1,16 +1,26 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { DeliveryForm } from "@/components/delivery-form";
 import { DeliveryList } from "@/components/delivery-list";
 import { DeliveryFiltersComponent } from "@/components/delivery-filters";
 import { LanguageToggle } from "@/components/language-toggle";
 import { useLanguage } from "@/components/language-provider";
+import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Toaster } from "@/components/ui/sonner";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { Plus, LogOut, User, ChevronDown } from "lucide-react";
 import {
   type DeliveryItem,
   type DeliveryStatus,
@@ -32,9 +42,16 @@ const STORAGE_KEY = "my-delivery-items";
 
 export default function Home() {
   const { t, language } = useLanguage();
+  const { user, isAuthenticated, logout } = useAuth();
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [filters, setFilters] = useState<DeliveryFilters>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+  };
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -132,6 +149,7 @@ export default function Home() {
     };
 
     setDeliveries(prev => [newDelivery, ...prev]);
+    setIsDialogOpen(false); // Close dialog after successful submission
     toast.success(t("messages.deliveryAdded"));
   };
 
@@ -188,6 +206,41 @@ export default function Home() {
                 {t("locationBadge")}
               </Badge>
               <LanguageToggle />
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <User className="h-4 w-4" />
+                      {user?.name}
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <div className="px-2 py-1.5 text-sm font-medium">
+                      {user?.email}
+                    </div>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="gap-2">
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Link href="/signin">
+                    <Button variant="ghost" size="sm" className="gap-2">
+                      <User className="h-4 w-4" />
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button size="sm">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -247,33 +300,69 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Add Delivery Form */}
+        {/* Welcome Message for Authenticated Users */}
+        {isAuthenticated && (
+          <div className="mb-6">
+            <div className="bg-card rounded-lg p-4 border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold">Welcome back, {user?.name}!</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Ready to manage your deliveries in Lahore?
+                  </p>
+                </div>
+                <Badge variant="secondary" className="gap-2">
+                  <User className="h-3 w-3" />
+                  Active
+                </Badge>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Delivery Button */}
         <div className="mb-8">
-          <DeliveryForm
-            onSubmit={handleAddDelivery}
-            translations={{
-              form: {
-                title: t("form.title"),
-                description: t("form.description"),
-                itemName: t("form.itemName"),
-                itemNamePlaceholder: t("form.itemNamePlaceholder"),
-                clientName: t("form.clientName"),
-                clientNamePlaceholder: t("form.clientNamePlaceholder"),
-                phoneNumber: t("form.phoneNumber"),
-                phoneNumberPlaceholder: t("form.phoneNumberPlaceholder"),
-                region: t("form.region"),
-                area: t("form.area"),
-                locationTitle: t("form.locationTitle"),
-                streetAddress: t("form.streetAddress"),
-                streetAddressPlaceholder: t("form.streetAddressPlaceholder"),
-                additionalDetails: t("form.additionalDetails"),
-                additionalDetailsPlaceholder: t("form.additionalDetailsPlaceholder"),
-                addDelivery: t("form.addDelivery"),
-                resetForm: t("form.resetForm"),
-                adding: t("form.adding"),
-              },
-            }}
-          />
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="gap-2">
+                <Plus className="h-5 w-5" />
+                {t("form.addDelivery")}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{t("form.title")}</DialogTitle>
+                <DialogDescription>
+                  {t("form.description")}
+                </DialogDescription>
+              </DialogHeader>
+              <DeliveryForm
+                onSubmit={handleAddDelivery}
+                translations={{
+                  form: {
+                    title: t("form.title"),
+                    description: t("form.description"),
+                    itemName: t("form.itemName"),
+                    itemNamePlaceholder: t("form.itemNamePlaceholder"),
+                    clientName: t("form.clientName"),
+                    clientNamePlaceholder: t("form.clientNamePlaceholder"),
+                    phoneNumber: t("form.phoneNumber"),
+                    phoneNumberPlaceholder: t("form.phoneNumberPlaceholder"),
+                    region: t("form.region"),
+                    area: t("form.area"),
+                    locationTitle: t("form.locationTitle"),
+                    streetAddress: t("form.streetAddress"),
+                    streetAddressPlaceholder: t("form.streetAddressPlaceholder"),
+                    additionalDetails: t("form.additionalDetails"),
+                    additionalDetailsPlaceholder: t("form.additionalDetailsPlaceholder"),
+                    addDelivery: t("form.addDelivery"),
+                    resetForm: t("form.resetForm"),
+                    adding: t("form.adding"),
+                  },
+                }}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Separator className="my-8" />
@@ -310,7 +399,6 @@ export default function Home() {
         </div>
       </footer>
 
-      <Toaster />
     </div>
   );
 }
