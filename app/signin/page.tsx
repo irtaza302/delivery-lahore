@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
@@ -186,7 +185,7 @@ export default function SignInPage() {
 
               <div className="mt-6 text-center">
                 <span className="text-sm text-muted-foreground">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                 </span>
                 <Link
                   href="/signup"

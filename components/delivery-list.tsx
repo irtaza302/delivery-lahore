@@ -14,10 +14,8 @@ import {
   MapPin,
   Phone,
   User,
-  Home,
   FileText,
   Eye,
-  Edit,
   MoreHorizontal,
   Calendar,
   Clock

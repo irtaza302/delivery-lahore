@@ -41,7 +41,7 @@ import {
 const STORAGE_KEY = "my-delivery-items";
 
 export default function Home() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { user, isAuthenticated, logout } = useAuth();
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [filters, setFilters] = useState<DeliveryFilters>({});
@@ -58,9 +58,14 @@ export default function Home() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored);
+        type DeliveryItemFromStorage = Omit<DeliveryItem, 'createdAt' | 'updatedAt' | 'deliveryDate'> & {
+          createdAt: string;
+          updatedAt: string;
+          deliveryDate?: string;
+        };
+        const parsed = JSON.parse(stored) as DeliveryItemFromStorage[];
         // Convert date strings back to Date objects
-        const deliveriesWithDates = parsed.map((delivery: any) => ({
+        const deliveriesWithDates: DeliveryItem[] = parsed.map((delivery) => ({
           ...delivery,
           createdAt: new Date(delivery.createdAt),
           updatedAt: new Date(delivery.updatedAt),
@@ -74,7 +79,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   // Save to localStorage whenever deliveries change
   useEffect(() => {
@@ -86,7 +91,7 @@ export default function Home() {
         toast.error(t("messages.saveError"));
       }
     }
-  }, [deliveries, isLoading]);
+  }, [deliveries, isLoading, t]);
 
   // Filter deliveries based on current filters
   const filteredDeliveries = useMemo(() => {

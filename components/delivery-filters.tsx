@@ -32,7 +32,7 @@ interface DeliveryFiltersProps {
 export function DeliveryFiltersComponent({ filters, onFiltersChange, totalCount, filteredCount }: DeliveryFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const updateFilters = (key: keyof DeliveryFilters, value: any) => {
+  const updateFilters = (key: keyof DeliveryFilters, value: DeliveryFilters[keyof DeliveryFilters]) => {
     onFiltersChange({
       ...filters,
       [key]: value,
