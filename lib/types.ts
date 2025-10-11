@@ -19,8 +19,8 @@ export interface DeliveryFilters {
   clientName?: string;
   location?: string;
   dateRange?: {
-    from: Date;
-    to: Date;
+    from?: Date;
+    to?: Date;
   };
   searchTerm?: string;
 }
